@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kanban Board</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body style="background-color:#d0d0d0; margin:2.5em">
+	<div class="container">
+		<h2>Modify Column</h2>
+		<form >
+			<div class="form-group">	
+				<label for="inputTitle"><i><h4>Title</h4></i></label>
+				<input id="titleColumn" name="titleCol" class="form-control" type="text" placeholder="Insert Title" requered>
+			</div>
+			<div class="form-group">
+				<label for="inputState"><i><h4>State</h4></i></label>
+				<select id="typeStateColumn" name="typeState" class="form-select" >
+					<option id="inCorso" value="in corso">In Corso</option>
+					<option id="arch" value="archiviato">Archiviato</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<input style="margin-top:1em;" class="btn btn-dark" type="button" value="Modify" id="sendDataCol">
+				<input style="margin-top:1em;" class="btn btn-dark" type="button" value="Back" id="back">
+			</div>
+			</div>
+		</form>
+	</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+<script>
+
+$(document).ready(function(){
+	
+	var getUrlParameter = function getUrlParameter(sParam) {
+	    var sPageURL = window.location.search.substring(1),
+	        sURLVariables = sPageURL.split('&'),
+	        sParameterName,
+	        i;
+
+	    for (i = 0; i < sURLVariables.length; i++) {
+	        sParameterName = sURLVariables[i].split('=');
+
+	        if (sParameterName[0] === sParam) {
+	            return typeof sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+	        }
+	    }
+	    return false;
+	};
+	
+	var titolo = getUrlParameter("title").replaceAll("_", " ").replaceAll("(a)", "'").replaceAll("(v)",",").replaceAll("(p)",".");
+	$('#titleColumn').val(titolo);
+	$('#typeStateColumn option[value="in corso"]').prop("selected", true);
+	
+	$("#sendDataCol").click(function(){
+	    $.ajax({
+	      type: "PUT",
+	      url: "/board/modifyColumn/",
+	      data: {titleColNew: $("#titleColumn").val(), typeStateNew: $("#typeStateColumn option:selected").text(), 
+	    	  titleCol: titolo},
+	      dataType: "JSON", 
+	      error: function(){
+	    	  alert("Qualcosa è andato storto nella modifica della colonna!");
+	    	  window.reload("/board/modifyColumn");
+	      }
+	    }).done(function (data){
+	    	window.location.replace("/board/");
+	    });
+	});
+	
+	$('#back').click(function(){
+		window.location.replace("/board/");
+	});
+});	
+
+
+
+</script>
+</body>
+</html>

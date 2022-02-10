@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kanban Board</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body style="background-color:#d0d0d0; margin:2.5em">
+	<div class="container">
+		<h2>Modify Tile</h2>
+		<form>
+			<div class="form-group">	
+				<label for="inputTitle"><i><h4>Title</h4></i></label>
+				<input id="titleTile" class="form-control" type="text" placeholder="Insert Title">
+			</div>
+			<div class="form-group">	
+				<label for="inputAuthor"><i><h4>Author</h4></i></label>
+				<input id="authorTile" class="form-control" type="text" placeholder="Insert Author">
+			</div>
+			<div class="form-group">
+				<label for="inputMessageType"><i><h4>Type</h4></i></label>
+				<select id="selectType" class="form-select" >
+					<option id="organizzativo" value="organizzativo">Organizzativo</option>
+					<option id="informativo" value="informativo">Informativo</option>
+				</select>
+			</div>
+			
+			<div class="form-group">	
+				<label for="inputMessageType"><i><h4>Message</h4></i></label>
+				<textarea id="message" class="form-control" rows="3" placeholder="Insert the tile's message"></textarea>
+			</div>
+			<div class="form-group">
+				<label for="inputColumn"><i><h4>Column</h4></i></label>
+				<select id="colSelected" class="form-select"></select>
+			</div>
+			<div class="form-group">
+				<input style="margin-top:1em;" class="btn btn-dark" type="button" value="Modify" id="sendDataTile">
+				<input style="margin-top:1em;" class="btn btn-dark" type="button" value="Back" id="back">
+			</div>
+		</form>
+	</div>
+		
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+<script>
+
+function sendDataTile(){
+	    $.ajax({
+	      type: "PUT",
+	      url: "/board/modifyTile/",
+	      data: {newTitle: $("#titleTile").val(), newAuthor: $("#authorTile").val(), 
+	    	  newMessageType: $("#selectType option:selected").text(), newContent: $("#message").val(), 
+	    	  newColumn: $("#colSelected option:selected").text()},
+	      dataType: "JSON"
+	    }).done(function (data){
+	    	window.location.replace("/board/");
+	    });
+	};
+
+
+
+$(document).ready(function(){
+	
+	var getUrlParameter = function getUrlParameter(sParam) {
+	    var sPageURL = window.location.search.substring(1),
+	        sURLVariables = sPageURL.split('&'),
+	        sParameterName,
+	        i;
+
+	    for (i = 0; i < sURLVariables.length; i++) {
+	        sParameterName = sURLVariables[i].split('=');
+
+	        if (sParameterName[0] === sParam) {
+	            return typeof sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+	        }
+	    }
+	    return false;
+	};
+	
+	var id = getUrlParameter("id");
+	var title = getUrlParameter("title").replaceAll("_", " ").replaceAll("(a)", "'").replaceAll("(v)",",").replaceAll("(p)",".");
+	var author = getUrlParameter("author").replaceAll("_", " ").replaceAll("(a)", "'").replaceAll("(v)",",").replaceAll("(p)",".");
+	var messageType = getUrlParameter("messageType").replaceAll("_", " ").replaceAll("(a)", "'").replaceAll("(v)",",").replaceAll("(p)",".");
+	var content = getUrlParameter("content").replaceAll("_", " ").replaceAll("(a)", "'").replaceAll("(v)",",").replaceAll("(p)",".");
+	var columns = getUrlParameter("columns").replaceAll("_", " ").replaceAll("(a)", "'").replaceAll("(v)",",").replaceAll("(p)",".");
+	
+	$.get("/board/getColumn/", function(data){
+		data.forEach( function(x){
+			$("#colSelected").append('<option value="'+x["title"].replaceAll(" ", "_").replaceAll("'", "(apostrofo)").replaceAll(",", "(virgola)").replaceAll(".", "(punto)")+'">'+x["title"]+'</option>');			
+		});	
+		$('#colSelected option[value="'+columns+'"]').prop("selected", true);	
+	});		
+	
+	$('#titleTile').val(title);
+	$('#authorTile').val(author);
+	$('#selectType option[value="'+messageType+'"]').prop("selected", true);
+	$('#message').val(content);
+	$('#selectType').prop("disabled", true);
+	$("#sendDataTile").click(function(){
+		$.ajax({
+		      type: "PUT",
+		      url: "/board/modifyTile/",
+		      data: {id: id, newTitle: $("#titleTile").val(), newAuthor: $("#authorTile").val(), 
+		    	  newMessageType: $("#selectType option:selected").text(), newContent: $("#message").val(), 
+		    	  newColumn: $("#colSelected option:selected").text()},
+		      dataType: "JSON", 
+		      error:function(){
+		    	  window.reload("/board/modifyTile");
+		      }
+		    }).done(function (data){
+		    	window.location.replace("/board/");
+		    });
+	});
+	
+	$('#back').click(function(){
+		window.location.replace("/board/");
+	});
+});	
+
+</script>
+</body>
+</html>
