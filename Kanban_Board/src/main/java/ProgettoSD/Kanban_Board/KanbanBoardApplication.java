@@ -14,7 +14,7 @@ public class KanbanBoardApplication {
 	public static void main(String[] args) {
 		
 		SpringApplication.run(KanbanBoardApplication.class, args);
-		System.out.println("Hello World");
+		System.out.println("Hello Italy");
 		
 	}
 
